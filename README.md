@@ -11,5 +11,5 @@ Built during Sprint-30, a 30-day hands-on security sprint.
 | `attack-navigator/` | ATT&CK coverage layer (Day 24) |
 | `reports/` | Pentest report PDF (Day 18) |
 
-Write-ups: https://braindump.0x8r41nr07.xyz/series/sprint-30
-Lab build guide: https://braindump.0x8r41nr07.xyz/my-infosec-homelab
+- Write-ups: https://braindump.0x8r41nr07.xyz/series/sprint-30
+- Lab build guide: https://braindump.0x8r41nr07.xyz/my-infosec-homelab
