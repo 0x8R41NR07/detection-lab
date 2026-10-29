@@ -1,0 +1,9 @@
+<!-- Wazuh agent on Ubuntu: the installer may not add the SSH log.
+     Append to /var/ossec/etc/ossec.conf (a second <ossec_config>
+     block is valid), then: sudo systemctl restart wazuh-agent -->
+<ossec_config>
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/auth.log</location>
+  </localfile>
+</ossec_config>
