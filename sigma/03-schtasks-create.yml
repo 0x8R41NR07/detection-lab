@@ -1,0 +1,24 @@
+title: Scheduled Task Created via schtasks.exe
+id: 3eb3f806-794d-4282-836d-98276be3f881
+status: experimental
+description: Detects schtasks.exe started with /create, i.e. a new scheduled task created from the command line. Mirrors Wazuh rule 100103. Does not see tasks created through PowerShell (Register-ScheduledTask) or the COM API; use Security event 4698 for those.
+author: 0x8R41NR07
+date: 2026-11-09
+tags:
+  - attack.persistence
+  - attack.execution
+  - attack.privilege-escalation
+  - attack.t1053.005
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\schtasks.exe'
+  selection_cmd:
+    CommandLine|contains: ' /create '
+  condition: all of selection_*
+falsepositives:
+  - Software installers and updaters that register their own update tasks
+  - Admin scripts and deployment tools
+level: medium

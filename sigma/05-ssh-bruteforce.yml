@@ -1,0 +1,25 @@
+title: SSH Failed Password (single event, threshold lives in the SIEM)
+id: d4218278-a992-47c7-958a-e84f5ab96118
+status: experimental
+description: |
+  Matches one failed SSH password attempt in the Linux auth log. On its own this is
+  normal noise (typos). Brute force is a burst of these from one source; Sigma core
+  rules describe single events, so the threshold (8 in 60 s, same source IP) is
+  implemented in the Wazuh rule 100105, not here.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: 0x8R41NR07
+date: 2026-11-10
+tags:
+  - attack.credential-access
+  - attack.t1110.001
+logsource:
+  product: linux
+  service: auth
+detection:
+  keywords:
+    - 'Failed password for'
+  condition: keywords
+falsepositives:
+  - Users mistyping their password (single events, which is why the SIEM counts them)
+level: low
