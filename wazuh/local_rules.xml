@@ -1,0 +1,49 @@
+<!-- Sprint-30 custom Wazuh rules (Wazuh 4.14.8)
+     Goes into /var/ossec/etc/rules/local_rules.xml on the manager.
+     100101 PowerShell encoded command (T1059.001)
+     100103 Scheduled task created via schtasks (T1053.005)
+     100105 SSH brute force (T1110.001)
+     100102 (LSASS) and 100104 (Run key) follow once tested. -->
+<group name="sprint30,">
+
+  <rule id="100101" level="12">
+    <!-- Parents: 61603 = every Sysmon Event 1 (level 0, never shown).
+         92027 = built-in "PowerShell spawned PowerShell" (level 4), 92057 = built-in
+         "base64 encoded command" (level 12). Listing them means this rule is still
+         checked when one of those built-ins wins the match first. -->
+    <if_sid>61603, 92027, 92057</if_sid>
+    <!-- The new process is powershell.exe -->
+    <field name="win.eventdata.image" type="pcre2">(?i)\\powershell\.exe$</field>
+    <!-- ...and its command line has -e, -ec, -enc or -encodedcommand (any case) -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\s-e(c|nc|ncodedcommand)?\s</field>
+    <description>Sprint30 D1: PowerShell encoded command</description>
+    <mitre>
+      <id>T1059.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="100103" level="10">
+    <!-- 61603 = every Sysmon Event 1 (Process Create), level 0, never shown -->
+    <if_sid>61603</if_sid>
+    <!-- The new process is schtasks.exe -->
+    <field name="win.eventdata.image" type="pcre2">(?i)\\schtasks\.exe$</field>
+    <!-- ...and it was told to create a task (not /query, /run, /delete) -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\s/create\s</field>
+    <description>Sprint30 D3: scheduled task created via schtasks</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <rule id="100105" level="12" frequency="8" timeframe="60">
+    <!-- 5760 = sshd: authentication failed (one alert per wrong password) -->
+    <if_matched_sid>5760</if_matched_sid>
+    <!-- all 8 failures must come from the same source IP -->
+    <same_srcip />
+    <description>Sprint30 D5: SSH brute force, 8+ fails in 60s from one IP</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+  </rule>
+
+</group>
