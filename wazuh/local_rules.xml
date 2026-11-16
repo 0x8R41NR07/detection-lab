@@ -1,9 +1,10 @@
 <!-- Sprint-30 custom Wazuh rules (Wazuh 4.14.8)
      Goes into /var/ossec/etc/rules/local_rules.xml on the manager.
      100101 PowerShell encoded command (T1059.001)
+     100102 LSASS memory dump via comsvcs.dll MiniDump (T1003.001)
      100103 Scheduled task created via schtasks (T1053.005)
-     100105 SSH brute force (T1110.001)
-     100102 (LSASS) and 100104 (Run key) follow once tested. -->
+     100104 Registry Run key value set (T1547.001)
+     100105 SSH brute force (T1110.001) -->
 <group name="sprint30,">
 
   <rule id="100101" level="12">
@@ -22,6 +23,19 @@
     </mitre>
   </rule>
 
+  <rule id="100102" level="14">
+    <!-- 61603 = every Sysmon Event 1 (Process Create), level 0, never shown -->
+    <if_sid>61603</if_sid>
+    <!-- The new process is rundll32.exe -->
+    <field name="win.eventdata.image" type="pcre2">(?i)\\rundll32\.exe$</field>
+    <!-- ...and it calls comsvcs, later followed by minidump -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)comsvcs.*minidump</field>
+    <description>Sprint30 D2: LSASS dump via comsvcs MiniDump</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+  </rule>
+
   <rule id="100103" level="10">
     <!-- 61603 = every Sysmon Event 1 (Process Create), level 0, never shown -->
     <if_sid>61603</if_sid>
@@ -32,6 +46,20 @@
     <description>Sprint30 D3: scheduled task created via schtasks</description>
     <mitre>
       <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <rule id="100104" level="10">
+    <!-- 61615 = every Sysmon Event 13 (Registry value set), level 0, never shown.
+         92302 = built-in "Run key modified using reg.exe" (level 6). Listing it means
+         this rule is still checked when 92302 wins the match first. -->
+    <if_sid>61615, 92302</if_sid>
+    <!-- Run or RunOnce key. \\+ = one or more backslashes: Wazuh stores Windows
+         paths with doubled backslashes between the parts. -->
+    <field name="win.eventdata.targetObject" type="pcre2">(?i)\\CurrentVersion\\+Run(Once)?\\+</field>
+    <description>Sprint30 D4: Run key value set</description>
+    <mitre>
+      <id>T1547.001</id>
     </mitre>
   </rule>
 
