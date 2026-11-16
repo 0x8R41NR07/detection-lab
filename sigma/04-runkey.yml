@@ -1,0 +1,22 @@
+title: Registry Run Key Value Set
+id: 130ab006-ca2e-47d0-aeac-6e350ee4e384
+status: experimental
+description: Detects a value being set under a Run or RunOnce key, the classic way to start a program at every logon. Catches any writer (reg.exe, PowerShell, the registry API), not just command-line tools. Mirrors Wazuh rule 100104.
+author: 0x8R41NR07
+date: 2026-11-16
+tags:
+  - attack.persistence
+  - attack.privilege-escalation
+  - attack.t1547.001
+logsource:
+  product: windows
+  category: registry_set
+detection:
+  selection:
+    TargetObject|contains:
+      - '\CurrentVersion\Run\'
+      - '\CurrentVersion\RunOnce\'
+  condition: selection
+falsepositives:
+  - Software installers and updaters adding their own autostart entry (OneDrive, Teams, Edge AutoLaunch)
+level: high
